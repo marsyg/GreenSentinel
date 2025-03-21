@@ -109,6 +109,7 @@ model Post {
   user        User      @relation(fields: [userId], references: [id])
   title       String
   content     String
+  imageUrl    String?   // URL to uploaded image
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   comments    Comment[]
