@@ -197,7 +197,7 @@ export default function LandingPage() {
 							size="lg"
 							variant="outline"
 							asChild
-							className="border-white/20 hover:bg-white/10"
+							className="border-white/20 text-green-900 hover:bg-white/10 hover:text-white"
 						>
 							<Link href="/community">Join the Community</Link>
 						</Button>
