@@ -33,8 +33,10 @@
 		"react": "^18",
 		"react-dom": "^18",
 		"socket.io": "^4.8.1",
+		"socket.io-client": "^4.8.1",
 		"tailwind-merge": "^3.0.2",
-		"tailwindcss-animate": "^1.0.7"
+		"tailwindcss-animate": "^1.0.7",
+		"twilio": "^5.5.1"
 	},
 	"devDependencies": {
 		"@types/d3": "^7.4.3",
