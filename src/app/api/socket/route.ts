@@ -1,32 +1,31 @@
+import { Server as HttpServer } from 'http';
+import { Server as IOServer, Socket } from 'socket.io';
 import { NextResponse } from 'next/server';
-import { Server } from 'socket.io';
 
-let io;
+let io: IOServer | null = null;
 
-export async function GET() {
+export const GET = async (req: Request) => {
   if (!io) {
-    io = new Server(globalThis.server, {
-      path: '/api/socket',
-      cors: {
-        origin: '*',
-        methods: ['GET', 'POST'],
-      },
-    });
+    const server = (req as any).socket?.server as HttpServer;
 
-    io.on('connection', (socket) => {
-      console.log('New client connected');
-
-      socket.on('disconnect', () => {
-        console.log('Client disconnected');
+    if (server) {
+      io = new IOServer(server, {
+        path: '/api/socket',
+        cors: {
+          origin: '*',
+          methods: ['GET', 'POST'],
+        },
       });
-    });
 
-    global.io = io; // Make the Socket.IO instance global
+      io.on('connection', (socket: Socket) => {
+        console.log('⚡ Client connected:', socket.id);
+
+        socket.on('disconnect', () => {
+          console.log('🔥 Client disconnected:', socket.id);
+        });
+      });
+    }
   }
 
-  return NextResponse.json({ message: 'Socket.IO initialized' });
-}
-
-export async function POST() {
-  return NextResponse.json({ message: 'POST method not implemented' });
-}
+  return NextResponse.json({ message: 'Socket.io initialized' });
+};
