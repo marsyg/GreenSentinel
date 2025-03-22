@@ -37,12 +37,13 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createPost, getAllPosts } from "@/actions/post.action";
 
 // Mock data for community page
 const MOCK_USERS = [
 	{
 		id: 1,
-		name: "Alex Johnson",
+		name: "Modi ji",
 		avatar: "/placeholder.svg?height=40&width=40",
 		role: "Conservationist",
 	},
@@ -78,7 +79,7 @@ const MOCK_POSTS = [
 		author: MOCK_USERS[0],
 		content:
 			"Just returned from a reforestation project in the Amazon. We planted over 500 trees in a previously cleared area. The local community was incredibly supportive and joined our efforts!",
-		image: "/placeholder.svg?height=400&width=600",
+		// image: "/placeholder.svg?height=400&width=600",
 		timestamp: "2 hours ago",
 		likes: 42,
 		comments: 8,
@@ -101,7 +102,7 @@ const MOCK_POSTS = [
 		author: MOCK_USERS[4],
 		content:
 			"New research paper published on the correlation between forest density and local rainfall patterns. The data clearly shows that deforestation is directly impacting precipitation in tropical regions, creating a dangerous feedback loop.",
-		image: "/placeholder.svg?height=300&width=600",
+		// image: "/placeholder.svg?height=300&width=600",
 		timestamp: "1 day ago",
 		likes: 76,
 		comments: 23,
@@ -160,32 +161,32 @@ export default function CommunityPage() {
 	const router = useRouter();
 
 	// Simulate login for demo purposes
-	useEffect(() => {
-		// Check if user is logged in (in a real app, this would check auth state)
-		const checkLoginStatus = () => {
-			// For demo, we'll just set to true after a delay to simulate checking auth
-			setTimeout(() => {
-				setIsLoggedIn(true);
-			}, 1000);
-		};
+	// useEffect(() => {
+	// 	// Check if user is logged in (in a real app, this would check auth state)
+	// 	const checkLoginStatus = () => {
+	// 		// For demo, we'll just set to true after a delay to simulate checking auth
+	// 		setTimeout(() => {
+	// 			setIsLoggedIn(true);
+	// 		}, 1000);
+	// 	};
 
-		checkLoginStatus();
-	}, []);
+	// 	checkLoginStatus();
+	// }, []);
 
 	// Auto-scroll chat to bottom when new messages arrive
 	useEffect(() => {
-		if (messagesEndRef.current) {
-			messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-		}
-	}, [chatMessages]);
+		const dbPosts = getAllPosts();
 
-	const handlePostSubmit = (e) => {
+		setPosts([{...dbPosts}, ...posts]);
+	}, [setPosts]);
+
+	const handlePostSubmit = async(e) => {
 		e.preventDefault();
 		if (!newPost.trim()) return;
 
 		// Add new post to the top of the feed
 		const newPostObj = {
-			id: posts.length + 1,
+			userId: 17,
 			author: MOCK_USERS[0], // Current user
 			content: newPost,
 			timestamp: "Just now",
@@ -194,6 +195,10 @@ export default function CommunityPage() {
 			shares: 0,
 			tags: [],
 		};
+
+		const post = await createPost(newPostObj);
+
+		// Add new post to the top of the feed
 
 		setPosts([newPostObj, ...posts]);
 		setNewPost("");
@@ -236,111 +241,6 @@ export default function CommunityPage() {
 			]);
 		}, 1000);
 	};
-
-	// Login/Registration form if not logged in
-	if (!isLoggedIn) {
-		return (
-			<div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[80vh]">
-				<Card className="w-full max-w-md">
-					<CardHeader>
-						<CardTitle className="text-2xl text-center">
-							Join Our Community
-						</CardTitle>
-						<CardDescription className="text-center">
-							Connect with fellow environmental advocates and make a difference
-							together
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<Tabs defaultValue="login">
-							<TabsList className="grid w-full grid-cols-2 mb-6">
-								<TabsTrigger value="login">Login</TabsTrigger>
-								<TabsTrigger value="register">Register</TabsTrigger>
-							</TabsList>
-
-							<TabsContent value="login">
-								<form className="space-y-4">
-									<div className="space-y-2">
-										<label htmlFor="email" className="text-sm font-medium">
-											Email
-										</label>
-										<Input
-											id="email"
-											type="email"
-											placeholder="your@email.com"
-										/>
-									</div>
-									<div className="space-y-2">
-										<label htmlFor="password" className="text-sm font-medium">
-											Password
-										</label>
-										<Input id="password" type="password" />
-									</div>
-									<Button
-										className="w-full"
-										onClick={() => setIsLoggedIn(true)}
-									>
-										Sign In
-									</Button>
-								</form>
-							</TabsContent>
-
-							<TabsContent value="register">
-								<form className="space-y-4">
-									<div className="space-y-2">
-										<label htmlFor="name" className="text-sm font-medium">
-											Full Name
-										</label>
-										<Input id="name" placeholder="Your Name" />
-									</div>
-									<div className="space-y-2">
-										<label htmlFor="reg-email" className="text-sm font-medium">
-											Email
-										</label>
-										<Input
-											id="reg-email"
-											type="email"
-											placeholder="your@email.com"
-										/>
-									</div>
-									<div className="space-y-2">
-										<label
-											htmlFor="reg-password"
-											className="text-sm font-medium"
-										>
-											Password
-										</label>
-										<Input id="reg-password" type="password" />
-									</div>
-									<div className="space-y-2">
-										<label htmlFor="interests" className="text-sm font-medium">
-											Areas of Interest
-										</label>
-										<Input
-											id="interests"
-											placeholder="e.g., Reforestation, Policy, Education"
-										/>
-									</div>
-									<Button
-										className="w-full"
-										onClick={() => setIsLoggedIn(true)}
-									>
-										Create Account
-									</Button>
-								</form>
-							</TabsContent>
-						</Tabs>
-					</CardContent>
-					<CardFooter className="flex justify-center">
-						<p className="text-sm text-muted-foreground">
-							By joining, you agree to our Terms of Service and Privacy Policy
-						</p>
-					</CardFooter>
-				</Card>
-			</div>
-		);
-	}
-
 	return (
 		<div className="container mx-auto px-4 py-8">
 			<div className="flex flex-col md:flex-row gap-6">
@@ -489,6 +389,7 @@ export default function CommunityPage() {
 													<Button
 														type="submit"
 														className="bg-green-600 hover:bg-green-700"
+														onClick={handlePostSubmit}
 													>
 														Post
 													</Button>
@@ -502,24 +403,25 @@ export default function CommunityPage() {
 							{/* Posts Feed */}
 							<div className="space-y-6">
 								{posts.map((post) => (
+									console.log(post),
 									<Card key={post.id} className="overflow-hidden">
 										<CardHeader className="pb-2">
 											<div className="flex justify-between items-start">
 												<div className="flex items-center gap-3">
 													<Avatar>
 														<AvatarImage
-															src={post.author.avatar}
-															alt={post.author.name}
+															src={post.author?.avatar}
+															alt={post.author?.name}
 														/>
 														<AvatarFallback>
-															{post.author.name.charAt(0)}
+															{post.author?.name.charAt(0) || "M"}
 														</AvatarFallback>
 													</Avatar>
 													<div>
 														<CardTitle className="text-base">
-															{post.author.name}
+															{post.author?.name || "Modi ji"}
 														</CardTitle>
-														<CardDescription>{post.timestamp}</CardDescription>
+														<CardDescription>{post.timestamp || "1 min ago"}</CardDescription>
 													</div>
 												</div>
 												<DropdownMenu>
@@ -570,7 +472,7 @@ export default function CommunityPage() {
 													className="flex items-center gap-1"
 												>
 													<ThumbsUp className="h-4 w-4" />
-													<span>{post.likes}</span>
+													<span>{post.likes || 1}</span>
 												</Button>
 												<Button
 													variant="ghost"
@@ -578,7 +480,7 @@ export default function CommunityPage() {
 													className="flex items-center gap-1"
 												>
 													<MessageCircle className="h-4 w-4" />
-													<span>{post.comments}</span>
+													<span>{post.comments || 0}</span>
 												</Button>
 												<Button
 													variant="ghost"
@@ -586,7 +488,7 @@ export default function CommunityPage() {
 													className="flex items-center gap-1"
 												>
 													<Share2 className="h-4 w-4" />
-													<span>{post.shares}</span>
+													<span>{post.shares || 0}</span>
 												</Button>
 											</div>
 										</CardFooter>

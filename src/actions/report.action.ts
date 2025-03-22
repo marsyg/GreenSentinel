@@ -41,18 +41,18 @@ export async function createReport(data: {
 }
 
 // Get all reports
-// export async function getReports() {
-//   try {
-//     const reports = await prisma.report.findMany({
-//       include: { user: true },
-//       orderBy: { createdAt: 'desc' },
-//     });
-//     return NextResponse.json(reports);
-//   } catch (error: any) {
-//     console.error('Error fetching reports:', error);
-//     return NextResponse.json({ error: error.message }, { status: 500 });
-//   }
-// }
+export async function getReports() {
+  try {
+    const reports = await prisma.report.findMany({
+      include: { user: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return NextResponse.json(reports);
+  } catch (error: any) {
+    console.error('Error fetching reports:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
 
 // Get a single report by ID
 export async function getReportById(id: string) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
 	Camera,
@@ -50,6 +50,7 @@ import {
 	SidebarTrigger,
 	SidebarInset,
 } from "@/components/ui/sidebar";
+import { createReport, getReports } from "@/actions/report.action";
 
 // Mock data for environmental activities
 const MOCK_ACTIVITIES = [
@@ -116,7 +117,7 @@ const MOCK_ACTIVITIES = [
 ];
 
 // Mock data for recent reports
-const MOCK_REPORTS = [
+let MOCK_REPORTS = [
 	{
 		id: 1,
 		title: "Illegal Logging Activity",
@@ -150,13 +151,26 @@ const MOCK_REPORTS = [
 ];
 
 export default function ReportPage() {
+	const [severity, setSeverity] = useState("medium");
 	const [reportType, setReportType] = useState("deforestation");
-	const [reportLocation, setReportLocation] = useState("");
+	const [reportLocation, setReportLocation] = useState("iiit-delhi, New Delhi, India");
 	const [reportDescription, setReportDescription] = useState("");
 	const [reportImages, setReportImages] = useState([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [activeTab, setActiveTab] = useState("new");
+	const [dbReports, setDbReports] = useState([]);
+
+
+	useEffect(() => {
+		const fetchReports = async () => {
+			const reports = await getReports();
+			MOCK_REPORTS = [{...reports},...MOCK_REPORTS]
+		};
+		fetchReports();
+	})
+
+
 
 	const handleImageUpload = (e : any) => {
 		// In a real app, this would handle file uploads
@@ -178,25 +192,30 @@ export default function ReportPage() {
 		setReportImages(reportImages.filter((img) => img.id !== id));
 	};
 
-	const handleSubmitReport = (e) => {
+	const handleSubmitReport = async(e) => {
 		e.preventDefault();
 		setIsSubmitting(true);
 
-		// Simulate API call with timeout
-		setTimeout(() => {
-			setIsSubmitting(false);
-			setIsSubmitted(true);
+		const newReport = {
+			userId:"1111",
+			type: reportType,
+			location: reportLocation,
+			description: reportDescription,
+			severity,
+		};
+
+		await createReport(newReport);
 
 			// Reset form after submission
-			setTimeout(() => {
-				setReportType("deforestation");
-				setReportLocation("");
-				setReportDescription("");
-				setReportImages([]);
-				setIsSubmitted(false);
-				setActiveTab("status");
-			}, 2000);
-		}, 1500);
+			// setTimeout(() => {
+			// 	setReportType("deforestation");
+			// 	setReportLocation("");
+			// 	setReportDescription("");
+			// 	setReportImages([]);
+			// 	setIsSubmitted(false);
+			// 	setActiveTab("status");
+			// }, 2000);
+
 	};
 
 	return (
@@ -206,7 +225,7 @@ export default function ReportPage() {
 					<SidebarHeader>
 						<div className="flex items-center gap-2 px-4 py-2">
 							<AlertTriangle className="h-5 w-5 text-red-500" />
-							<h2 className="text-lg font-semibold">Environmental Reports</h2>
+							<h2 className="text-lg font-semibold">Envirnmental Reports</h2>
 						</div>
 					</SidebarHeader>
 
@@ -506,7 +525,7 @@ export default function ReportPage() {
 
 													<div className="space-y-2">
 														<Label htmlFor="severity">Severity</Label>
-														<Select defaultValue="medium">
+														<Select defaultValue="medium" onValueChange={setSeverity}>
 															<SelectTrigger>
 																<SelectValue placeholder="Select severity level" />
 															</SelectTrigger>
@@ -654,6 +673,7 @@ export default function ReportPage() {
 									</CardHeader>
 									<CardContent>
 										<div className="space-y-6">
+											{}
 											{MOCK_REPORTS.map((report) => (
 												<div
 													key={report.id}
@@ -663,10 +683,10 @@ export default function ReportPage() {
 														<div className="flex justify-between items-start">
 															<div>
 																<h3 className="font-semibold">
-																	{report.title}
+																	{report.title || "Urgent Report"}
 																</h3>
 																<p className="text-sm text-muted-foreground">
-																	Reported on {report.date}
+																	Reported on {report.date || "March 15, 2025"}
 																</p>
 															</div>
 															<Badge
@@ -680,7 +700,7 @@ export default function ReportPage() {
 																		: "bg-red-500"
 																}
 															>
-																{report.status}
+																{report.status || "Under Investigation"}
 															</Badge>
 														</div>
 													</div>
@@ -689,23 +709,23 @@ export default function ReportPage() {
 															<div>
 																<p className="text-sm font-medium">Location</p>
 																<p className="text-sm text-muted-foreground">
-																	{report.location}
+																	{report.location || reportLocation}
 																</p>
 															</div>
 															<div>
 																<p className="text-sm font-medium">Severity</p>
 																<p className="text-sm text-muted-foreground">
-																	{report.severity}
+																	{report.severity || severity}
 																</p>
 															</div>
 															<div>
 																<p className="text-sm font-medium">Report ID</p>
 																<p className="text-sm text-muted-foreground">
-																	#{report.id.toString().padStart(6, "0")}
+																	#{report.id?.toString().padStart(6, "0") || `17290`}
 																</p>
 															</div>
 														</div>
-														<p className="text-sm mb-4">{report.description}</p>
+														<p className="text-sm mb-4">{report.description || reportDescription}</p>
 														<div className="flex justify-end">
 															<Button variant="outline" size="sm">
 																View Details
